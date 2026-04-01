@@ -1,4 +1,4 @@
-# linear-skill
+# linear-skills
 
 Linear 이슈 관리와 Git 브랜치/PR 워크플로우를 통합하는 Claude Code 플러그인.
 
@@ -10,6 +10,7 @@ Linear 이슈 관리와 Git 브랜치/PR 워크플로우를 통합하는 Claude 
 ```
 /plugin marketplace add suslmk-lee/linear-skills
 /plugin install ls@linear-skills
+/reload-plugins
 ```
 
 ## 초기 설정
