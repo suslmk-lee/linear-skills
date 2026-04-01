@@ -1,0 +1,7 @@
+{
+  "name": "linear-skill",
+  "version": "1.0.0",
+  "description": "Linear 이슈 컨텍스트 주입 + Git 브랜치/PR 워크플로우",
+  "author": "suslmk-lee",
+  "skills": ["ls"]
+}
