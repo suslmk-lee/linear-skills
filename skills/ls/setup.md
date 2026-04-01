@@ -109,37 +109,41 @@ echo "감지된 기준 브랜치: $BASE_BRANCH"
 ```bash
 mkdir -p ~/.config/linear
 python3 -c "
-import json, os
+import json, os, sys
 p = os.path.expanduser('~/.config/linear/config.json')
 config = json.load(open(p)) if os.path.exists(p) else {}
-config['api_key'] = '$API_KEY'
-config['slack_webhook'] = '$SLACK_WEBHOOK'
+config['api_key'] = sys.argv[1]
+config['slack_webhook'] = sys.argv[2]
 with open(p, 'w') as f:
     json.dump(config, f, indent=2, ensure_ascii=False)
 print('저장:', p)
-"
+" "$API_KEY" "$SLACK_WEBHOOK"
 ```
 
 프로젝트 설정 파일 저장:
 ```bash
 mkdir -p .claude
 python3 -c "
-import json
+import json, sys
 config = {
-  'team_id': '$TEAM_ID',
-  'team_key': '$TEAM_KEY',
-  'base_branch': '$BASE_BRANCH',
+  'team_id': sys.argv[1],
+  'team_key': sys.argv[2],
+  'base_branch': sys.argv[3],
   'state_mapping': {
-    'in_progress': {'id': '$IN_PROGRESS_ID', 'name': '$IN_PROGRESS_NAME'},
-    'in_review':   {'id': '$IN_REVIEW_ID',   'name': '$IN_REVIEW_NAME'},
-    'done':        {'id': '$DONE_ID',         'name': '$DONE_NAME'},
-    'canceled':    {'id': '$CANCELED_ID',     'name': '$CANCELED_NAME'}
+    'in_progress': {'id': sys.argv[4], 'name': sys.argv[5]},
+    'in_review':   {'id': sys.argv[6], 'name': sys.argv[7]},
+    'done':        {'id': sys.argv[8], 'name': sys.argv[9]},
+    'canceled':    {'id': sys.argv[10], 'name': sys.argv[11]}
   }
 }
 with open('.claude/linear.json', 'w') as f:
     json.dump(config, f, indent=2, ensure_ascii=False)
 print('저장: .claude/linear.json')
-"
+" "$TEAM_ID" "$TEAM_KEY" "$BASE_BRANCH" \
+  "$IN_PROGRESS_ID" "$IN_PROGRESS_NAME" \
+  "$IN_REVIEW_ID" "$IN_REVIEW_NAME" \
+  "$DONE_ID" "$DONE_NAME" \
+  "$CANCELED_ID" "$CANCELED_NAME"
 ```
 
 ## 완료 메시지

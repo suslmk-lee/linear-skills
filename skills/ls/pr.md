@@ -60,7 +60,18 @@ RESPONSE=$(curl -s -X POST https://api.linear.app/graphql \
   -H "Authorization: $API_KEY" -H "Content-Type: application/json" \
   --data-binary "@$TMPFILE")
 rm -f "$TMPFILE"
-echo "$RESPONSE"
+
+ISSUE_UUID=$(echo "$RESPONSE" | python3 -c "
+import json, sys
+nodes = json.load(sys.stdin)['data']['issues']['nodes']
+print(nodes[0]['id'] if nodes else '')
+")
+ISSUE_TITLE=$(echo "$RESPONSE" | python3 -c "
+import json, sys
+nodes = json.load(sys.stdin)['data']['issues']['nodes']
+print(nodes[0]['title'] if nodes else '')
+")
+if [ -z "$ISSUE_UUID" ]; then echo "이슈를 찾을 수 없습니다: $ISSUE_KEY"; exit 1; fi
 ```
 
 ## Step 4: diff 분석

@@ -115,11 +115,11 @@ n이면 중단합니다.
 ## Step 5: 브랜치 생성 또는 전환
 
 ```bash
-if git show-ref --verify --quiet refs/heads/$BRANCH_NAME; then
-  git checkout $BRANCH_NAME
+if git show-ref --verify --quiet "refs/heads/$BRANCH_NAME"; then
+  git checkout "$BRANCH_NAME"
   echo "기존 브랜치로 전환: $BRANCH_NAME"
 else
-  git checkout -b $BRANCH_NAME $BASE_BRANCH
+  git checkout -b "$BRANCH_NAME" "$BASE_BRANCH"
   echo "새 브랜치 생성: $BRANCH_NAME"
 fi
 ```

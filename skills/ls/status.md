@@ -25,6 +25,7 @@ if os.path.exists(p): print(json.load(open(p)).get('api_key', ''))
 " 2>/dev/null)
 fi
 if [ -z "$API_KEY" ]; then echo "API 키 없음. /ls:setup을 먼저 실행하세요"; exit 1; fi
+if [ ! -f ".claude/linear.json" ]; then echo "프로젝트 설정 없음. /ls:setup을 먼저 실행하세요"; exit 1; fi
 ```
 
 ## Step 3: 이슈 상태 조회

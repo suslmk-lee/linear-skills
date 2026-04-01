@@ -83,7 +83,10 @@ echo "$ALL_ISSUES"
 두 응답을 병합하여 (내 이슈 먼저, 중복 제거) 다음 형식으로 출력합니다:
 
 현재 브랜치의 이슈(`CURRENT_ISSUE`)가 있으면 해당 행 앞에 `★`를 표시합니다.
-`assignee`가 없는 이슈는 담당자 칸을 `-`로 표시합니다.
+담당자 표시 규칙:
+- `assignee.id == VIEWER_ID`이면 `(나)` 표시
+- `assignee`가 있고 다른 사람이면 `(assignee.name)` 표시
+- `assignee`가 없으면 `-` 표시
 
 ```
 ★ ADE-24  In Progress  ade-24-log-level-separation       (나)
