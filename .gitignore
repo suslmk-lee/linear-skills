@@ -1,0 +1,15 @@
+# Linear 설정 (API 키 포함)
+.claude/linear.json
+
+# 임시 파일
+/tmp/linear-*.json
+/tmp/slack-*.json
+/tmp/pr-body-*.md
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
