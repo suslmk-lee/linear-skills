@@ -9,7 +9,7 @@ Linear 이슈 관리와 Git 브랜치/PR 워크플로우를 통합하는 Claude 
 
 ```
 /plugin marketplace add suslmk-lee/linear-skills
-/plugin install linear-skill@linear-skills
+/plugin install ls@linear-skills
 ```
 
 ## 초기 설정
