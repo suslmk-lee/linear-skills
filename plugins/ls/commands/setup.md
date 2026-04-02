@@ -100,11 +100,7 @@ echo "감지된 기준 브랜치: $BASE_BRANCH"
 
 ## Step 5: Slack Webhook URL (선택)
 
-개인 알람(작업 시작)과 팀 알람(PR 생성·완료)을 분리하여 설정합니다.
-
-> "개인 Slack Webhook URL을 입력하세요 (작업 시작 알람, 엔터로 스킵):"
-
-입력 없으면 `SLACK_PERSONAL_WEBHOOK`을 빈 문자열로 설정합니다.
+팀 채널로 PR 생성·완료 알람을 전송합니다.
 
 > "팀 Slack Webhook URL을 입력하세요 (PR 생성·완료 알람, 엔터로 스킵):"
 
@@ -120,12 +116,11 @@ import json, os, sys
 p = os.path.expanduser('~/.config/linear/config.json')
 config = json.load(open(p)) if os.path.exists(p) else {}
 config['api_key'] = sys.argv[1]
-config['slack_personal_webhook'] = sys.argv[2]
-config['slack_team_webhook'] = sys.argv[3]
+config['slack_team_webhook'] = sys.argv[2]
 with open(p, 'w') as f:
     json.dump(config, f, indent=2, ensure_ascii=False)
 print('저장:', p)
-" "$API_KEY" "$SLACK_PERSONAL_WEBHOOK" "$SLACK_TEAM_WEBHOOK"
+" "$API_KEY" "$SLACK_TEAM_WEBHOOK"
 ```
 
 프로젝트 설정 파일 저장:
@@ -162,7 +157,6 @@ print('저장: .claude/linear.json')
 
 팀: {TEAM_KEY}
 기준 브랜치: {BASE_BRANCH}
-개인 Slack 알람: {설정됨 / 미설정}
 팀 Slack 알람: {설정됨 / 미설정}
 
 사용 가능한 커맨드:

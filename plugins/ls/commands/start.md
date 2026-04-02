@@ -144,28 +144,7 @@ curl -s -X POST https://api.linear.app/graphql \
 rm -f "$TMPFILE"
 ```
 
-## Step 7: Slack 알람 (개인)
-
-작업 시작 알람은 개인 채널로만 전송합니다.
-
-```bash
-SLACK_URL=$(python3 -c "
-import json, os
-p = os.path.expanduser('~/.config/linear/config.json')
-if os.path.exists(p): print(json.load(open(p)).get('slack_personal_webhook', ''))
-" 2>/dev/null)
-if [ -n "$SLACK_URL" ]; then
-  SLACK_MESSAGE="[$ISSUE_KEY] 작업 시작 — $BRANCH_NAME"
-  TMPFILE=$(mktemp /tmp/slack-XXXXXX.json)
-  python3 -c "import json,sys; print(json.dumps({'text': sys.argv[1]}, ensure_ascii=False))" \
-    "$SLACK_MESSAGE" > "$TMPFILE"
-  curl -s -X POST "$SLACK_URL" -H "Content-Type: application/json" \
-    --data-binary "@$TMPFILE" > /dev/null
-  rm -f "$TMPFILE"
-fi
-```
-
-## Step 8: 세션 컨텍스트 블록 출력
+## Step 7: 세션 컨텍스트 블록 출력
 
 수락기준은 description에서 `- [ ]` 패턴을 추출합니다. 없으면 이 항목을 생략합니다.
 댓글은 `@이름 "내용"` 형식으로 출력합니다.
