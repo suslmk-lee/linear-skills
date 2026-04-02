@@ -144,13 +144,15 @@ curl -s -X POST https://api.linear.app/graphql \
 rm -f "$TMPFILE"
 ```
 
-## Step 7: Slack 알람
+## Step 7: Slack 알람 (개인)
+
+작업 시작 알람은 개인 채널로만 전송합니다.
 
 ```bash
 SLACK_URL=$(python3 -c "
 import json, os
 p = os.path.expanduser('~/.config/linear/config.json')
-if os.path.exists(p): print(json.load(open(p)).get('slack_webhook', ''))
+if os.path.exists(p): print(json.load(open(p)).get('slack_personal_webhook', ''))
 " 2>/dev/null)
 if [ -n "$SLACK_URL" ]; then
   SLACK_MESSAGE="[$ISSUE_KEY] 작업 시작 — $BRANCH_NAME"
