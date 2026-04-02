@@ -5,6 +5,7 @@
 ## Step 1: 설정 로드
 
 ```bash
+export PYTHONIOENCODING=utf-8
 API_KEY="$LINEAR_API_KEY"
 if [ -z "$API_KEY" ]; then
   API_KEY=$(python3 -c "

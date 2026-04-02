@@ -5,6 +5,7 @@
 ## Step 1: 브랜치에서 이슈 키 추출
 
 ```bash
+export PYTHONIOENCODING=utf-8
 CURRENT_BRANCH=$(git branch --show-current 2>/dev/null)
 ISSUE_KEY=$(echo "$CURRENT_BRANCH" | grep -oP '^[a-z]+-\d+' | tr '[:lower:]' '[:upper:]')
 if [ -z "$ISSUE_KEY" ]; then
