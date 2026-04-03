@@ -47,7 +47,11 @@ team, num = sys.argv[1], int(sys.argv[2])
 q = '''{ issues(filter: {
   team: { key: { eq: \"''' + team + '''\" } },
   number: { eq: ''' + str(num) + ''' }
-}) { nodes { id identifier title description state { name type } } } }'''
+}) { nodes {
+  id identifier title description state { name type }
+  parent { id identifier branchName }
+  children { nodes { identifier state { type } } }
+} } }'''
 print(json.dumps({'query': q}))
 " "$ISSUE_TEAM" "$ISSUE_NUM" > "$TMPFILE"
 RESPONSE=$(curl -s -X POST https://api.linear.app/graphql \
@@ -59,6 +63,8 @@ echo "$RESPONSE"
 
 응답에서:
 - `ISSUE_UUID`, `ISSUE_TITLE`, `ISSUE_DESC`, `CURRENT_STATE_NAME`, `CURRENT_STATE_TYPE` 추출
+- `PARENT_KEY`: `data.issues.nodes[0].parent.identifier`
+- `PARENT_BRANCH`: `data.issues.nodes[0].parent.branchName`
 
 현재 상태 유형 확인:
 - `completed`: "이미 완료된 이슈입니다." 출력 후 종료
@@ -97,7 +103,38 @@ curl -s -X POST https://api.linear.app/graphql \
 rm -f "$TMPFILE"
 ```
 
-## Step 6: Slack 알람 (팀)
+## Step 6: 서브이슈 완료 체크
+
+```bash
+if [ -n "$PARENT_KEY" ]; then
+  TOTAL=$(echo "$RESPONSE" | python3 -c "
+import json, sys
+nodes = json.load(sys.stdin)['data']['issues']['nodes']
+children = nodes[0].get('children', {}).get('nodes', []) if nodes else []
+print(len(children))
+")
+  DONE_COUNT=$(echo "$RESPONSE" | python3 -c "
+import json, sys
+nodes = json.load(sys.stdin)['data']['issues']['nodes']
+children = nodes[0].get('children', {}).get('nodes', []) if nodes else []
+completed = [c for c in children if c['state']['type'] in ('completed', 'cancelled')]
+print(len(completed))
+")
+
+  if [ "$DONE_COUNT" -eq "$TOTAL" ] && [ "$TOTAL" -gt 0 ]; then
+    echo ""
+    echo "모든 서브이슈가 완료되었습니다 ($DONE_COUNT/$TOTAL)"
+    echo "부모 이슈 [$PARENT_KEY] 브랜치에 통합할 준비가 되었습니다."
+    echo "  → /ls:integrate $PARENT_KEY 를 실행하세요"
+  else
+    REMAINING=$((TOTAL - DONE_COUNT))
+    echo ""
+    echo "서브이슈 진행: $DONE_COUNT/$TOTAL 완료 (미완료 ${REMAINING}개)"
+  fi
+fi
+```
+
+## Step 7: Slack 알람 (팀)
 
 이슈 완료 알람은 팀 채널로 전송합니다.
 
@@ -118,7 +155,7 @@ if [ -n "$SLACK_URL" ]; then
 fi
 ```
 
-## 완료 메시지
+## Step 8: 완료 메시지
 
 ```
 {ISSUE_KEY} — {ISSUE_TITLE}
