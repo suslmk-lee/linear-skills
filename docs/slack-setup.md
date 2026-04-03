@@ -1,65 +1,48 @@
 # Slack 알람 설정 가이드
 
-PR 생성 및 이슈 완료 시 팀 Slack 채널로 알람을 받을 수 있습니다.
+Linear의 공식 Slack 앱을 연동하면 이슈 상태 변경 시 자동으로 팀 채널에 알람이 발송됩니다.  
+클라이언트 도구(Claude Code 스킬, 웹 UI, API 직접 호출 등)에 관계없이 동작합니다.
 
 ## 알람 시점
 
-| 커맨드 | 채널 | 메시지 예시 |
+| 이벤트 | 채널 | 예시 메시지 |
 |--------|------|------------|
-| `/ls:pr` | 팀 채널 | `[ADE-24] 로그 레벨 분리 — PR 리뷰 요청: https://github.com/.../pull/42` |
-| `/ls:done` | 팀 채널 | `[ADE-24] 로그 레벨 분리 — 완료` |
-
-작업 시작(`/ls:start`)은 본인이 직접 실행하는 행위이므로 알람을 전송하지 않습니다.
+| 이슈 상태 변경 (In Progress → Done 등) | 팀 채널 | Linear 앱 포맷으로 자동 발송 |
+| PR 연결 (이슈 → In Review) | 팀 채널 | Linear 앱 포맷으로 자동 발송 |
 
 ---
 
-## Step 1: Slack Incoming Webhook 생성
+## Step 1: Linear Slack 앱 설치
 
-1. [Slack API 앱 관리 페이지](https://api.slack.com/apps)로 이동
-2. **Create New App** → **From scratch** 선택
-3. App 이름 입력 (예: `linear-skill-bot`), 워크스페이스 선택 후 **Create App**
-4. 좌측 메뉴 **Features → Incoming Webhooks** 클릭
-5. **Activate Incoming Webhooks** 토글 → **On**
-6. **Add New Webhook to Workspace** 클릭
-7. 팀 공용 채널 선택 후 **허용**
-8. 생성된 Webhook URL 복사
-
-```
-https://hooks.slack.com/services/<WORKSPACE_ID>/<APP_ID>/<TOKEN>
-```
+Linear 웹 앱에서:
+1. **Settings → Integrations → Slack** 이동
+2. **Connect** 클릭 → Slack 워크스페이스 인증 및 허용
 
 ---
 
-## Step 2: /ls:setup에서 Webhook URL 등록
+## Step 2: 알람 채널 설정
 
-`/ls:setup` 실행 시 팀 Webhook URL을 입력합니다:
+**Settings → Integrations → Slack** 페이지에서:
 
-```
-팀 Slack Webhook URL을 입력하세요 (PR 생성·완료 알람, 엔터로 스킵):
-> https://hooks.slack.com/services/...
-```
-
-저장 위치: `~/.config/linear/config.json`
-
-```json
-{
-  "api_key": "lin_api_xxxxx",
-  "slack_team_webhook": "https://hooks.slack.com/services/..."
-}
-```
+1. **Notifications** 섹션 → **Add channel** 클릭
+2. 팀 공용 채널 선택 (예: `#dev-alerts`)
+3. 알람을 받을 이벤트 선택:
+   - ✅ **Issue state changed** — 이슈 상태 변경 시 알람
+   - ☐ Comment added — 댓글 노이즈 줄이려면 off 권장
+4. **Team** 드롭다운에서 알람 받을 팀 선택
 
 ---
 
-## Webhook URL 변경 또는 삭제
+## Step 3: 동작 확인
 
-- **변경**: `/ls:setup`을 다시 실행하여 새 URL 입력
-- **삭제**: `~/.config/linear/config.json`에서 `slack_team_webhook` 값을 빈 문자열로 수정
-
-값이 비어 있으면 알람이 조용히 스킵됩니다.
+Linear에서 이슈 상태를 변경하면 설정한 Slack 채널에 알람이 자동 발송됩니다.
 
 ---
 
 ## 팀 도입 시 권장 설정
 
-팀원 전원이 동일한 팀 webhook URL을 `/ls:setup`에서 입력하면  
-PR 생성·완료 알람이 팀 채널에 자동으로 집약됩니다.
+- **채널**: `#dev-linear` 또는 `#sprint-updates` 등 전용 채널 권장
+- **이벤트**: "Issue state changed" 만 활성화하면 노이즈 최소화
+- **팀 필터**: 작업 중인 팀만 선택하면 무관한 알람 차단
+
+Linear Slack 앱은 워크스페이스 단위로 설치되므로, 한 번 설정하면 팀원 전원이 별도 설정 없이 알람을 받습니다.
