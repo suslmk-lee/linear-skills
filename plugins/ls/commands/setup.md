@@ -1,6 +1,6 @@
 # /ls:setup — Linear 초기 설정
 
-API 키 등록, 팀 선택, 워크플로우 상태 매핑, Slack Webhook 설정을 진행합니다.
+API 키 등록, 팀 선택, 워크플로우 상태 매핑을 진행합니다.
 
 ## Step 1: API 키 확인
 
@@ -98,15 +98,7 @@ echo "감지된 기준 브랜치: $BASE_BRANCH"
 비어 있으면:
 > "기준 브랜치를 입력하세요 (예: main, master):"
 
-## Step 5: Slack Webhook URL (선택)
-
-팀 채널로 PR 생성·완료 알람을 전송합니다.
-
-> "팀 Slack Webhook URL을 입력하세요 (PR 생성·완료 알람, 엔터로 스킵):"
-
-입력 없으면 `SLACK_TEAM_WEBHOOK`을 빈 문자열로 설정합니다.
-
-## Step 6: 설정 파일 저장
+## Step 5: 설정 파일 저장
 
 전역 설정 파일 저장:
 ```bash
@@ -116,11 +108,10 @@ import json, os, sys
 p = os.path.expanduser('~/.config/linear/config.json')
 config = json.load(open(p)) if os.path.exists(p) else {}
 config['api_key'] = sys.argv[1]
-config['slack_team_webhook'] = sys.argv[2]
 with open(p, 'w') as f:
     json.dump(config, f, indent=2, ensure_ascii=False)
 print('저장:', p)
-" "$API_KEY" "$SLACK_TEAM_WEBHOOK"
+" "$API_KEY"
 ```
 
 프로젝트 설정 파일 저장:
@@ -157,7 +148,6 @@ print('저장: .claude/linear.json')
 
 팀: {TEAM_KEY}
 기준 브랜치: {BASE_BRANCH}
-팀 Slack 알람: {설정됨 / 미설정}
 
 사용 가능한 커맨드:
   /ls:list    — 이슈 목록
