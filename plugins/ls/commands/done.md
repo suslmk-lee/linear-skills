@@ -137,28 +137,7 @@ print(len(completed))
 fi
 ```
 
-## Step 7: Slack 알람 (팀)
-
-이슈 완료 알람은 팀 채널로 전송합니다.
-
-```bash
-SLACK_URL=$(python3 -c "
-import json, os
-p = os.path.expanduser('~/.config/linear/config.json')
-if os.path.exists(p): print(json.load(open(p)).get('slack_team_webhook', ''))
-" 2>/dev/null)
-if [ -n "$SLACK_URL" ]; then
-  SLACK_MESSAGE="[$ISSUE_KEY] $ISSUE_TITLE — 완료"
-  TMPFILE=$(mktemp /tmp/slack-XXXXXX.json)
-  python3 -c "import json,sys; print(json.dumps({'text': sys.argv[1]}, ensure_ascii=False))" \
-    "$SLACK_MESSAGE" > "$TMPFILE"
-  curl -s -X POST "$SLACK_URL" -H "Content-Type: application/json" \
-    --data-binary "@$TMPFILE" > /dev/null
-  rm -f "$TMPFILE"
-fi
-```
-
-## Step 8: 완료 메시지
+## Step 7: 완료 메시지
 
 ```
 {ISSUE_KEY} — {ISSUE_TITLE}
