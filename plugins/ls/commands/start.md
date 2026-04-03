@@ -80,6 +80,7 @@ q = '''{ issues(filter: {
   number: { eq: ''' + str(num) + ''' }
 }) { nodes {
   id identifier title description branchName
+  parent { id identifier branchName }
   state { id name }
   comments(last: 5) { nodes { body user { name } } }
 } } }'''
@@ -97,6 +98,8 @@ echo "$RESPONSE"
 - `ISSUE_TITLE`: `data.issues.nodes[0].title`
 - `ISSUE_DESC`: `data.issues.nodes[0].description`
 - `BRANCH_NAME`: `data.issues.nodes[0].branchName`
+- `PARENT_KEY`: `data.issues.nodes[0].parent.identifier` (없으면 빈 문자열)
+- `PARENT_BRANCH`: `data.issues.nodes[0].parent.branchName` (없으면 빈 문자열)
 - 수락기준: `ISSUE_DESC`에서 `- [ ]` 패턴 줄 추출
 - 댓글: `data.issues.nodes[0].comments.nodes[]`
 
@@ -116,11 +119,26 @@ n이면 중단합니다.
 ## Step 5: 브랜치 생성 또는 전환
 
 ```bash
+# 서브이슈이고 브랜치가 아직 없을 때만 묻는다
+if [ -n "$PARENT_KEY" ] && ! git show-ref --verify --quiet "refs/heads/$BRANCH_NAME"; then
+  CURRENT_BRANCH=$(git branch --show-current 2>/dev/null)
+  echo "이 이슈는 [$PARENT_KEY]의 서브이슈입니다. 분기 기준 브랜치를 선택하세요:"
+  echo "  1) 현재 브랜치: $CURRENT_BRANCH"
+  echo "  2) 부모 이슈 브랜치: $PARENT_BRANCH"
+  echo "  3) 기본 브랜치: $BASE_BRANCH"
+  # 사용자 입력 대기 → BRANCH_BASE 설정
+  # 입력이 1 또는 엔터 → BRANCH_BASE="$CURRENT_BRANCH"
+  # 입력이 2 → BRANCH_BASE="$PARENT_BRANCH"
+  # 입력이 3 → BRANCH_BASE="$BASE_BRANCH"
+else
+  BRANCH_BASE="$BASE_BRANCH"
+fi
+
 if git show-ref --verify --quiet "refs/heads/$BRANCH_NAME"; then
   git checkout "$BRANCH_NAME"
   echo "기존 브랜치로 전환: $BRANCH_NAME"
 else
-  git checkout -b "$BRANCH_NAME" "$BASE_BRANCH"
+  git checkout -b "$BRANCH_NAME" "$BRANCH_BASE"
   echo "새 브랜치 생성: $BRANCH_NAME"
 fi
 ```
@@ -154,6 +172,7 @@ rm -f "$TMPFILE"
 ```
 ## 현재 작업 세션
 이슈: {ISSUE_KEY} — {ISSUE_TITLE}
+부모 이슈: {PARENT_KEY}                 ← parent가 있을 때만
 설명: {ISSUE_DESC 첫 두 줄}
 수락기준:                          ← description에 - [ ] 항목이 있을 때만
   [ ] ...
