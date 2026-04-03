@@ -22,14 +22,11 @@ Linear 웹 앱에서:
 
 ## Step 2: 알람 채널 설정
 
-**Settings → Integrations → Slack** 페이지에서:
+채널 설정은 **팀(Team) 설정**에서 합니다 (글로벌 Integrations 페이지가 아님):
 
-1. **Notifications** 섹션 → **Add channel** 클릭
-2. 팀 공용 채널 선택 (예: `#dev-alerts`)
-3. 알람을 받을 이벤트 선택:
-   - ✅ **Issue state changed** — 이슈 상태 변경 시 알람
-   - ☐ Comment added — 댓글 노이즈 줄이려면 off 권장
-4. **Team** 드롭다운에서 알람 받을 팀 선택
+1. **Settings → Teams → [팀 이름] → Notifications** 이동
+2. **Slack channel** 항목에 알람을 받을 채널 입력 (예: `#dev-alerts`)
+3. 저장
 
 ---
 
