@@ -49,8 +49,9 @@ q = '''{ issues(filter: {
   number: { eq: ''' + str(num) + ''' }
 }) { nodes {
   id identifier title description state { name type }
-  parent { id identifier branchName }
-  children { nodes { identifier state { type } } }
+  parent { id identifier branchName
+    children { nodes { identifier state { type } } }
+  }
 } } }'''
 print(json.dumps({'query': q}))
 " "$ISSUE_TEAM" "$ISSUE_NUM" > "$TMPFILE"
@@ -110,13 +111,15 @@ if [ -n "$PARENT_KEY" ]; then
   TOTAL=$(echo "$RESPONSE" | python3 -c "
 import json, sys
 nodes = json.load(sys.stdin)['data']['issues']['nodes']
-children = nodes[0].get('children', {}).get('nodes', []) if nodes else []
+parent = nodes[0].get('parent') if nodes else None
+children = parent.get('children', {}).get('nodes', []) if parent else []
 print(len(children))
 ")
   DONE_COUNT=$(echo "$RESPONSE" | python3 -c "
 import json, sys
 nodes = json.load(sys.stdin)['data']['issues']['nodes']
-children = nodes[0].get('children', {}).get('nodes', []) if nodes else []
+parent = nodes[0].get('parent') if nodes else None
+children = parent.get('children', {}).get('nodes', []) if parent else []
 completed = [c for c in children if c['state']['type'] in ('completed', 'cancelled')]
 print(len(completed))
 ")
