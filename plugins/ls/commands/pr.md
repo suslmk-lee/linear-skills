@@ -54,6 +54,8 @@ q = '''{ issues(filter: {
 }) { nodes {
   id identifier title description
   comments(last: 5) { nodes { body user { name } } }
+  parent { id identifier }
+  children { nodes { identifier title state { name type } } }
 } } }'''
 print(json.dumps({'query': q}))
 " "$ISSUE_TEAM" "$ISSUE_NUM" > "$TMPFILE"
@@ -75,6 +77,31 @@ print(nodes[0]['title'] if nodes else '')
 if [ -z "$ISSUE_UUID" ]; then echo "이슈를 찾을 수 없습니다: $ISSUE_KEY"; exit 1; fi
 ```
 
+## Step 3a: 이슈 유형 판단
+
+```bash
+PARENT_KEY=$(echo "$RESPONSE" | python3 -c "
+import json, sys
+nodes = json.load(sys.stdin)['data']['issues']['nodes']
+parent = nodes[0].get('parent') if nodes else None
+print(parent['identifier'] if parent else '')
+")
+
+CHILDREN_COUNT=$(echo "$RESPONSE" | python3 -c "
+import json, sys
+nodes = json.load(sys.stdin)['data']['issues']['nodes']
+children = nodes[0].get('children', {}).get('nodes', []) if nodes else []
+print(len(children))
+")
+
+if [ -n "$PARENT_KEY" ]; then
+  echo "경고: 이 이슈는 [$PARENT_KEY]의 서브이슈입니다."
+  echo "서브이슈는 일반적으로 PR을 생성하지 않습니다."
+  echo "계속 진행하시겠습니까? (y/n):"
+  # n이면 중단
+fi
+```
+
 ## Step 4: diff 분석
 
 ```bash
@@ -86,12 +113,31 @@ git diff $BASE_BRANCH...HEAD
 
 위에서 수집한 정보를 기반으로 PR 초안을 작성합니다:
 
+```bash
+if [ "$CHILDREN_COUNT" -gt 0 ]; then
+  SUB_SUMMARY=$(echo "$RESPONSE" | python3 -c "
+import json, sys
+nodes = json.load(sys.stdin)['data']['issues']['nodes']
+children = nodes[0].get('children', {}).get('nodes', []) if nodes else []
+lines = []
+for c in children:
+    done = c['state']['type'] in ('completed', 'cancelled')
+    mark = 'x' if done else ' '
+    lines.append(f'- [{mark}] {c[\"identifier\"]} \u2014 {c[\"title\"]}')
+print('\n'.join(lines))
+")
+fi
+```
+
 - **제목**: `[{ISSUE_KEY}] {ISSUE_TITLE}`
 - **본문**:
 
 ```markdown
 ## 개요
 {이슈 설명 기반 요약 — 1-3 문장}
+
+## 서브이슈 완료 목록
+{SUB_SUMMARY — CHILDREN_COUNT > 0 일 때만 이 섹션 포함}
 
 ## 변경 사항
 {git diff 분석 기반 bullet points}
